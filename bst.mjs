@@ -6,7 +6,7 @@ class Node {
   }
 }
 
-class Tree {
+export default class Tree {
   constructor(array) {
     this.root = this.buildTree(array);
   }
@@ -41,6 +41,7 @@ class Tree {
 
   insert(value) {
     let currentNode = this.root;
+    let balanced;
 
     if (currentNode === null) {
       currentNode = new Node(value);
@@ -61,11 +62,18 @@ class Tree {
         }
       }
     }
+
+    balanced = this.isBalanced();
+
+    if (balanced === false) {
+      this.rebalance();
+    }
   }
 
   delete(value) {
     let nodeToDelete = this.root;
     let parentNode = null;
+    let balanced;
 
     if (nodeToDelete === null) {
       return null;
@@ -137,6 +145,12 @@ class Tree {
       } else if (parentNode.right === nodeToDelete) {
         parentNode.right = currentNode;
       }
+    }
+
+    balanced = this.isBalanced();
+
+    if (balanced === false) {
+      this.rebalance();
     }
   }
 
@@ -296,22 +310,22 @@ class Tree {
     return depth;
   }
 
-  #checkBalance(node) {
+  #checkBalance(node, balance = true) {
     if (node === null) {
-      return 0;
+      return { result: 0, balance: balance };
     }
 
-    let leftBranch = 1 + this.#checkBalance(node.left);
-    let rightBranch = 1 + this.#checkBalance(node.right);
+    let leftBranch = 1 + this.#checkBalance(node.left, balance).result;
+    let rightBranch = 1 + this.#checkBalance(node.right, balance).result;
 
     if (leftBranch - rightBranch < -1 || leftBranch - rightBranch > 1) {
-      return false;
+      balance = false;
     }
 
     if (leftBranch > rightBranch) {
-      return leftBranch;
+      return { result: leftBranch, balanced: balance };
     } else {
-      return rightBranch;
+      return { result: rightBranch, balanced: balance };
     }
   }
 
@@ -320,9 +334,9 @@ class Tree {
       return null;
     }
 
-    let balanced = this.#checkBalance(this.root);
+    let isBalanced = this.#checkBalance(this.root);
 
-    if (balanced === false) {
+    if (isBalanced.balanced === false) {
       return false;
     } else return true;
   }
